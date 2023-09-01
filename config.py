@@ -1,0 +1,18 @@
+markers_to_extract = [
+    'right_shoulder',
+    'right_elbow',
+    'right_wrist',
+    'right_hip',
+    'right_knee',
+    'right_ankle',
+    'left_shoulder',
+    'left_elbow',
+    'left_wrist',
+    'left_hip',
+    'left_knee',
+    'left_ankle',
+    'left_heel',
+    'right_heel',
+    'right_foot_index',
+    'left_foot_index',
+]
