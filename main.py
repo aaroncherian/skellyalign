@@ -11,11 +11,7 @@ from visualize_data import plot_3d_scatter
 
 import config
 
-def main(path_to_freemocap_data, path_to_qualisys_data):
-    freemocap_data = np.load(path_to_freemocap_data)
-    qualisys_data = np.load(path_to_qualisys_data)
-
-    representative_frame = 300
+def main(freemocap_data:np.ndarray, qualisys_data:np.ndarray, representative_frame):
 
     freemocap_representative_frame = freemocap_data[representative_frame, :, :]
     qualisys_representative_frame = qualisys_data[representative_frame, :, :]
@@ -29,12 +25,17 @@ def main(path_to_freemocap_data, path_to_qualisys_data):
 
     plot_3d_scatter(freemocap_data_transformed, qualisys_data)
 
+    return freemocap_data_transformed
 
 if __name__ == "__main__":
     qualisys_data_path = r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\qualisys_MDN_NIH_Trial3\output_data\clipped_qualisys_skel_3d.npy"
     freemocap_data_path = r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\sesh_2023-05-17_14_53_48_MDN_NIH_Trial3\output_data\mediapipe_body_3d_xyz.npy"
 
-    main(freemocap_data_path, qualisys_data_path)
+    freemocap_data = np.load(freemocap_data_path)
+    qualisys_data = np.load(qualisys_data_path)
+
+
+    main(freemocap_data=freemocap_data, qualisys_data=qualisys_data, representative_frame=300)
 
 
     
