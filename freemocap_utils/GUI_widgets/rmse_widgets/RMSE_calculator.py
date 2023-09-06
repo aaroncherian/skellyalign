@@ -31,7 +31,7 @@ def calculate_rmse_dataframe(qualisys_data:np.ndarray, freemocap_data:np.ndarray
             rmse_list = []
             
             for dimension_count,dimension in enumerate(dimension_list):
-                rmse = calculate_rmse(qualisys_data[:,qualisys_marker_index,dimension_count],freemocap_data[:,mediapipe_marker_index,dimension_count])
+                rmse = calculate_rmse(freemocap_data[:,mediapipe_marker_index,dimension_count],qualisys_data[:,qualisys_marker_index,dimension_count])
                 
                 rmse_list.append(rmse) #add rmse per dimension to a list 
 
