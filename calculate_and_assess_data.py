@@ -7,7 +7,7 @@ from marker_lists.mediapipe_markers import mediapipe_markers
 from marker_lists.qualisys_markers import qualisys_markers
 
 import pandas as pd
-
+from pathlib import Path
 def convert_3d_array_to_dataframe(data_3d_array:np.ndarray, data_marker_list:list):
     """
     Convert the FreeMoCap data from a numpy array to a pandas DataFrame.
@@ -49,12 +49,16 @@ def convert_3d_array_to_dataframe(data_3d_array:np.ndarray, data_marker_list:lis
 
 qualisys_data_path = r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\qualisys_MDN_NIH_Trial3\output_data\clipped_qualisys_skel_3d.npy"
 freemocap_data_path = r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\sesh_2023-05-17_14_53_48_MDN_NIH_Trial3\output_data\mediapipe_body_3d_xyz.npy"
+freemocap_output_folder_path = Path(r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\sesh_2023-05-17_14_53_48_MDN_NIH_Trial3\output_data")
+
 
 freemocap_data = np.load(freemocap_data_path)
 qualisys_data = np.load(qualisys_data_path)
 
 
 freemocap_data_transformed = main(freemocap_data=freemocap_data, qualisys_data=qualisys_data, representative_frame=800)
+np.save(freemocap_output_folder_path/'mediapipe_body_3d_xyz_transformed.npy', freemocap_data_transformed)
+
 
 freemocap_df = convert_3d_array_to_dataframe(data_3d_array=freemocap_data_transformed, data_marker_list=mediapipe_markers)
 qualisys_df = convert_3d_array_to_dataframe(data_3d_array=qualisys_data, data_marker_list=qualisys_markers)
