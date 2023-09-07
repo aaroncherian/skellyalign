@@ -98,14 +98,15 @@ def plot_trajectory_with_error_shading(freemocap_df, qualisys_df, rmse_per_frame
 
     """
     # Filter the DataFrames to only include data for the specified joint
-    joint_trajectory_data = freemocap_df[freemocap_df['Marker'] == joint_name]
+    freemocap_joint_trajectory_data = freemocap_df[freemocap_df['Marker'] == joint_name]
+    qualisys_joint_trajectory_data = qualisys_df[qualisys_df['Marker'] == joint_name]
     joint_rmse_data = rmse_per_frame_df[rmse_per_frame_df['Marker'] == joint_name]
     
     fig, axes = plt.subplots(len(dimensions), 1, figsize=(10, 6))
     
     for ax, dim in zip(axes, dimensions):
         # Further filter to get data for the specific dimension
-        dim_trajectory_data = joint_trajectory_data[dim]
+        dim_trajectory_data = freemocap_joint_trajectory_data[dim]
         dim_rmse_data = joint_rmse_data[dim]
         
         # Calculate percentiles for shading
@@ -113,10 +114,11 @@ def plot_trajectory_with_error_shading(freemocap_df, qualisys_df, rmse_per_frame
         p50 = dim_rmse_data.quantile(0.50)
         p75 = dim_rmse_data.quantile(0.75)
         
-        ax.plot(joint_trajectory_data['Frame'], dim_trajectory_data, label=f'Trajectory ({dim.upper()})')
-        ax.fill_between(joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data >= p75), alpha=0.5, color='red')
-        ax.fill_between(joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data <= p25), alpha=0.5, color='green')
-        ax.fill_between(joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data > p25) & (dim_rmse_data < p75), alpha=0.5, color='yellow')
+        ax.plot(freemocap_joint_trajectory_data['Frame'], dim_trajectory_data, label=f'FreeMoCap Trajectory ({dim.upper()})')
+        ax.plot(qualisys_joint_trajectory_data['Frame'], qualisys_joint_trajectory_data[dim], label=f'Qualisys Trajectory({dim.upper()})')
+        ax.fill_between(freemocap_joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data >= p75), alpha=0.5, color='red')
+        ax.fill_between(freemocap_joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data <= p25), alpha=0.5, color='green')
+        ax.fill_between(freemocap_joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data > p25) & (dim_rmse_data < p75), alpha=0.5, color='yellow')
         
         ax.set_title(f"{joint_name} - {dim.upper()} Dimension")
         ax.set_xlabel('Frame')

@@ -23,7 +23,7 @@ def main(freemocap_data:np.ndarray, qualisys_data:np.ndarray, representative_fra
 
     freemocap_data_transformed = apply_transformation(transformation_matrix=transformation_matrix, data_to_transform=freemocap_data)
 
-    plot_3d_scatter(freemocap_data_transformed, qualisys_data)
+    # plot_3d_scatter(freemocap_data_transformed, qualisys_data)
 
     return freemocap_data_transformed
 
