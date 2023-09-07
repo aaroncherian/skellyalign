@@ -14,7 +14,7 @@ def calculate_rmse_per_frame(freemocap_data, qualisys_data, mediapipe_indices, q
     - qualisys_indices (list): List of marker names in Qualisys data.
     
     Returns:
-    - rmse_per_frame_df (pandas.DataFrame): DataFrame containing RMSE per frame for each marker and each dimension (x, y, z).
+    - rmse_per_frame_df (pandas.DataFrame): DataFrame containing RMSE per frame for each marker and each dimension (X, Y, Z).
     """
     
     num_frames = freemocap_data.shape[0]
@@ -29,7 +29,7 @@ def calculate_rmse_per_frame(freemocap_data, qualisys_data, mediapipe_indices, q
             mediapipe_marker_index = mediapipe_indices.index(marker_name)
             qualisys_marker_index = qualisys_indices.index(marker_name)
             
-            # Loop through each dimension (x, y, z)
+            # Loop through each dimension (X, Y, Z)
             for dim_index, dim_name in enumerate(dimensions):
                 freemocap_series = freemocap_data[:, mediapipe_marker_index, dim_index]
                 qualisys_series = qualisys_data[:, qualisys_marker_index, dim_index]
@@ -39,11 +39,17 @@ def calculate_rmse_per_frame(freemocap_data, qualisys_data, mediapipe_indices, q
                 
                 # Append the results to the list
                 for frame_index, rmse_value in enumerate(rmse_per_frame):
-                    rmse_data.append([frame_index, marker_name, dim_name, rmse_value])
+                    frame_data = [frame_index, marker_name]
+                    frame_data.extend([rmse_value if dim_name == d else None for d in dimensions])
+                    rmse_data.append(frame_data)
     
     # Create a DataFrame from the list
-    rmse_per_frame_df = pd.DataFrame(rmse_data, columns=['Frame', 'Marker', 'Dimension', 'RMSE'])
-    
+    columns = ['Frame', 'Marker'] + dimensions
+    rmse_per_frame_df = pd.DataFrame(rmse_data, columns=columns)
+
+    # Remove any None values to clean up the DataFrame
+    rmse_per_frame_df = rmse_per_frame_df.groupby(['Frame', 'Marker']).first().reset_index()
+
     return rmse_per_frame_df
 
 def plot_error_heatmap(rmse_per_frame_df):
