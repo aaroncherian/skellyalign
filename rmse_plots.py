@@ -3,94 +3,57 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-def calculate_rmse_per_frame(freemocap_data, qualisys_data, mediapipe_indices, qualisys_indices):
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.colors as mcolors
+
+def calculate_rmse_per_frame(freemocap_df, qualisys_df):
     """
     Calculate RMSE per frame for each marker and each dimension.
     
     Parameters:
-    - freemocap_data (numpy.ndarray): The FreeMoCap data array. Shape should be (num_frames, num_markers, 3).
-    - qualisys_data (numpy.ndarray): The Qualisys data array. Shape should be (num_frames, num_markers, 3).
-    - mediapipe_indices (list): List of marker names in FreeMoCap data.
-    - qualisys_indices (list): List of marker names in Qualisys data.
+    - freemocap_df (pandas.DataFrame): DataFrame containing FreeMoCap data per frame for each marker and each dimension (x, y, z).
+    - qualisys_df (pandas.DataFrame): DataFrame containing Qualisys data per frame for each marker and each dimension (x, y, z).
     
     Returns:
-    - rmse_per_frame_df (pandas.DataFrame): DataFrame containing RMSE per frame for each marker and each dimension (X, Y, Z).
+    - rmse_per_frame_df (pandas.DataFrame): DataFrame containing RMSE per frame for each marker and each dimension (x, y, z).
     """
-    
-    num_frames = freemocap_data.shape[0]
-    dimensions = ['x', 'y', 'z']
     
     # Initialize an empty list to hold the data
     rmse_data = []
-    
-    # Loop through each marker name
-    for marker_name in mediapipe_indices:
-        if marker_name in qualisys_indices:
-            mediapipe_marker_index = mediapipe_indices.index(marker_name)
-            qualisys_marker_index = qualisys_indices.index(marker_name)
+
+    # Loop through each unique marker name in the FreeMoCap DataFrame
+    for marker_name in freemocap_df['Marker'].unique():
+        
+        if marker_name in qualisys_df['Marker'].unique():
+            # Filter the data for the specific marker in both DataFrames
+            freemocap_marker_df = freemocap_df[freemocap_df['Marker'] == marker_name]
+            qualisys_marker_df = qualisys_df[qualisys_df['Marker'] == marker_name]
             
-            # Loop through each dimension (X, Y, Z)
-            for dim_index, dim_name in enumerate(dimensions):
-                freemocap_series = freemocap_data[:, mediapipe_marker_index, dim_index]
-                qualisys_series = qualisys_data[:, qualisys_marker_index, dim_index]
-                
-                # Calculate RMSE for each frame
-                rmse_per_frame = np.sqrt((freemocap_series - qualisys_series)**2)
+            # Merge the two DataFrames on 'Frame' for alignment
+            merged_df = pd.merge(freemocap_marker_df, qualisys_marker_df, on='Frame', suffixes=('_freemocap', '_qualisys'))
+            
+            # Calculate RMSE for each dimension (x, y, z)
+            for dim in ['x', 'y', 'z']:
+                rmse_per_frame = np.sqrt((merged_df[f"{dim}_freemocap"] - merged_df[f"{dim}_qualisys"]) ** 2)
                 
                 # Append the results to the list
-                for frame_index, rmse_value in enumerate(rmse_per_frame):
-                    frame_data = [frame_index, marker_name]
-                    frame_data.extend([rmse_value if dim_name == d else None for d in dimensions])
+                for frame, rmse_value in zip(merged_df['Frame'], rmse_per_frame):
+                    frame_data = [frame, marker_name]
+                    frame_data.extend([rmse_value if dim == d else None for d in ['x', 'y', 'z']])
                     rmse_data.append(frame_data)
-    
+                    
     # Create a DataFrame from the list
-    columns = ['Frame', 'Marker'] + dimensions
+    columns = ['Frame', 'Marker', 'x', 'y', 'z']
     rmse_per_frame_df = pd.DataFrame(rmse_data, columns=columns)
-
+    
     # Remove any None values to clean up the DataFrame
     rmse_per_frame_df = rmse_per_frame_df.groupby(['Frame', 'Marker']).first().reset_index()
-
+    
     return rmse_per_frame_df
 
-def plot_error_heatmap(rmse_per_frame_df):
-    """
-    Plot a heatmap of RMSE values per frame for each marker and each dimension.
-    
-    Parameters:
-    - rmse_per_frame_df (pandas.DataFrame): DataFrame containing RMSE per frame for each marker and each dimension.
-    
-    Returns:
-    - None (displays the heatmap plot).
-    """
-    
-    # Create a pivot table for the heatmap
-    pivot_df = rmse_per_frame_df.pivot_table(values='RMSE', index=['Frame'], columns=['Marker', 'Dimension'], aggfunc=np.mean)
-    
-    # Plot the heatmap
-    plt.figure(figsize=(15, 15))
-    sns.heatmap(pivot_df, cmap='coolwarm', cbar_kws={'label': 'RMSE'})
-    plt.title('Heatmap of RMSE per Frame for Each Marker and Dimension')
-    plt.show()
 
-# Generate some example data for demonstration
-# Let's assume we have 100 frames, 3 markers, and 3 dimensions (x, y, z)
-# num_frames = 100
-# num_markers = 3
-# num_dims = 3
-
-# # For simplicity, we'll generate random data for FreeMoCap and Qualisys
-# freemocap_data = np.random.rand(num_frames, num_markers, num_dims)
-# qualisys_data = np.random.rand(num_frames, num_markers, num_dims)
-
-# # Assume these are the names of the markers in FreeMoCap and Qualisys
-# mediapipe_indices = ['marker_1', 'marker_2', 'marker_3']
-# qualisys_indices = ['marker_1', 'marker_2', 'marker_3']
-
-# # Calculate RMSE per frame
-# rmse_per_frame_df = calculate_rmse_per_frame(freemocap_data, qualisys_data, mediapipe_indices, qualisys_indices)
-
-# # Plot the heatmap
-# plot_error_heatmap(rmse_per_frame_df)
 
 def calculate_max_min_errors(qualisys_data, freemocap_data, qualisys_indices, mediapipe_indices):
     """
@@ -122,3 +85,43 @@ def calculate_max_min_errors(qualisys_data, freemocap_data, qualisys_indices, me
     
     max_min_errors_df = pd.DataFrame(max_min_errors_list)
     return max_min_errors_df
+
+def plot_trajectory_with_error_shading(freemocap_df, qualisys_df, rmse_per_frame_df, joint_name, dimensions=['x', 'y', 'z']):
+    """
+    Plot the trajectory for a specific joint across X, Y, Z dimensions with error shading.
+    
+    Parameters:
+    - freemocap_df (pandas.DataFrame): DataFrame containing FreeMoCap data per frame for each marker and each dimension (x, y, z).
+    - rmse_per_frame_df (pandas.DataFrame): DataFrame containing RMSE per frame for each marker and each dimension (x, y, z).
+    - joint_name (str): The name of the joint to plot.
+    - dimensions (list): List of dimensions to plot, default is ['x', 'y', 'z'].
+
+    """
+    # Filter the DataFrames to only include data for the specified joint
+    joint_trajectory_data = freemocap_df[freemocap_df['Marker'] == joint_name]
+    joint_rmse_data = rmse_per_frame_df[rmse_per_frame_df['Marker'] == joint_name]
+    
+    fig, axes = plt.subplots(len(dimensions), 1, figsize=(10, 6))
+    
+    for ax, dim in zip(axes, dimensions):
+        # Further filter to get data for the specific dimension
+        dim_trajectory_data = joint_trajectory_data[dim]
+        dim_rmse_data = joint_rmse_data[dim]
+        
+        # Calculate percentiles for shading
+        p25 = dim_rmse_data.quantile(0.25)
+        p50 = dim_rmse_data.quantile(0.50)
+        p75 = dim_rmse_data.quantile(0.75)
+        
+        ax.plot(joint_trajectory_data['Frame'], dim_trajectory_data, label=f'Trajectory ({dim.upper()})')
+        ax.fill_between(joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data >= p75), alpha=0.5, color='red')
+        ax.fill_between(joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data <= p25), alpha=0.5, color='green')
+        ax.fill_between(joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data > p25) & (dim_rmse_data < p75), alpha=0.5, color='yellow')
+        
+        ax.set_title(f"{joint_name} - {dim.upper()} Dimension")
+        ax.set_xlabel('Frame')
+        ax.set_ylabel('Trajectory')
+        ax.legend()
+        
+    plt.tight_layout()
+    plt.show()
