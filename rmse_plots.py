@@ -118,7 +118,7 @@ def plot_trajectory_with_error_shading(freemocap_df, qualisys_df, rmse_per_frame
         ax.plot(qualisys_joint_trajectory_data['Frame'], qualisys_joint_trajectory_data[dim], label=f'Qualisys Trajectory({dim.upper()})')
         ax.fill_between(freemocap_joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data >= p75), alpha=0.5, color='red')
         ax.fill_between(freemocap_joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data <= p25), alpha=0.5, color='green')
-        ax.fill_between(freemocap_joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data > p25) & (dim_rmse_data < p75), alpha=0.5, color='yellow')
+        # ax.fill_between(freemocap_joint_trajectory_data['Frame'], dim_trajectory_data.min(), dim_trajectory_data, where=(dim_rmse_data > p25) & (dim_rmse_data < p75), alpha=0.5, color='yellow')
         
         ax.set_title(f"{joint_name} - {dim.upper()} Dimension")
         ax.set_xlabel('Frame')
