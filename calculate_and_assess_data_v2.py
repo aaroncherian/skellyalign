@@ -1,11 +1,7 @@
-from data_utils.dataframe_builder import DataFrameBuilder
 from data_utils.load_and_process_data import load_and_process_data
-from marker_lists.mediapipe_markers import mediapipe_markers
-from marker_lists.qualisys_markers import qualisys_markers
-
 
 from pathlib import Path
-import pandas as pd
+
 
 
 qualisys_data_path = Path(r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\qualisys_MDN_NIH_Trial3\output_data\clipped_qualisys_skel_3d.npy")
