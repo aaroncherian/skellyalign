@@ -20,7 +20,7 @@ def load_and_process_data(path_to_freemocap_data, path_to_qualisys_data):
     freemocap_data_dict = (freemocap_builder
                     .load_data()
                     .extract_common_markers()
-                    .convert_to_dataframe()
+                    .convert_to_dataframe(use_extracted=True)
                     .build())
     freemocap_dataframe = freemocap_data_dict['dataframe_of_3d_data']
 
@@ -29,7 +29,7 @@ def load_and_process_data(path_to_freemocap_data, path_to_qualisys_data):
     qualisys_data_dict = (qualisys_builder
                         .load_data()
                         .extract_common_markers()
-                        .convert_to_dataframe()
+                        .convert_to_dataframe(use_extracted=True)
                         .build())
     qualisys_dataframe = qualisys_data_dict['dataframe_of_3d_data']
 

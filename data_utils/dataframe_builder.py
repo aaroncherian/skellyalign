@@ -42,8 +42,7 @@ class DataFrameBuilder:
     
     def extract_common_markers(self):
         """
-        Extract common markers based on marker_list and config.
-
+        Extract markers from a specified list 
         Returns:
         self
         """
@@ -56,19 +55,29 @@ class DataFrameBuilder:
             markers_to_extract=config.markers_to_extract)
         return self
 
-    def convert_to_dataframe(self):
+    def convert_to_dataframe(self, use_extracted=False):
         """
-        Convert the extracted 3D data to a DataFrame.
+        Convert the 3D data to a DataFrame.
 
+        Parameters:
+        - use_extracted (bool): Flag to specify whether to use extracted 3D array. If False, uses original 3D array.
+        
         Returns:
         self
         """
-        if self.extracted_3d_array is None:
-            raise ValueError(f"{EXTRACTED_3D_ARRAY} is None. You must run extract_common_markers() first.")
-            
+        target_3d_array = self.extracted_3d_array if use_extracted else self.data_3d_array
+        
+        # Check if the target array exists
+        if target_3d_array is None:
+            raise ValueError(f"The target 3D array is None. You must run load_data() and optionally extract_common_markers() first.")
+        
+        # Use the appropriate marker list
+        marker_list_to_use = config.markers_to_extract if use_extracted else self.marker_list
+
         self.dataframe_of_3d_data = self._convert_3d_array_to_dataframe(
-            data_3d_array=self.extracted_3d_array,
-            data_marker_list=config.markers_to_extract)
+            data_3d_array=target_3d_array,
+            data_marker_list=marker_list_to_use)
+        
         return self
 
     def build(self):
