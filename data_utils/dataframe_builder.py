@@ -3,26 +3,50 @@ import pandas as pd
 
 import config
 
-# Define more generic constants
+# Define constants
 DATA_3D_ARRAY = 'data_3d_array'
 EXTRACTED_3D_ARRAY = 'extracted_3d_array'
 DATAFRAME_OF_3D_DATA = 'dataframe_of_3d_data'
 
 class DataFrameBuilder:
+    """
+    A class for building a DataFrame from 3D motion capture data and returning the data in a dictionary. Can return:
+    1) The 3d numpy array
+    2) A 3d numpy array containing only markers from a specified list
+    3) A DataFrame containing the 3d data
+    """
     def __init__(self, path_to_data, marker_list):
+        """
+        Initialize the DataFrameBuilder.
+
+        Parameters:
+        - path_to_data (Path or str): Path to the data file.
+        - marker_list (list): List of marker names.
+        """
         self.path_to_data = path_to_data
         self.marker_list = marker_list
         self.data = {}
-
         self.data_3d_array = None
         self.extracted_3d_array = None
         self.dataframe_of_3d_data = None
     
     def load_data(self):
+        """
+        Load 3D data from file into numpy array.
+
+        Returns:
+        self
+        """
         self.data_3d_array = np.load(self.path_to_data)
         return self
     
     def extract_common_markers(self):
+        """
+        Extract common markers based on marker_list and config.
+
+        Returns:
+        self
+        """
         if self.data_3d_array is None:
             raise ValueError(f"{DATA_3D_ARRAY} is None. You must run load_data() first.")
             
@@ -33,6 +57,12 @@ class DataFrameBuilder:
         return self
 
     def convert_to_dataframe(self):
+        """
+        Convert the extracted 3D data to a DataFrame.
+
+        Returns:
+        self
+        """
         if self.extracted_3d_array is None:
             raise ValueError(f"{EXTRACTED_3D_ARRAY} is None. You must run extract_common_markers() first.")
             
@@ -42,7 +72,12 @@ class DataFrameBuilder:
         return self
 
     def build(self):
+        """
+        Build the final DataFrame with 3D data.
 
+        Returns:
+        dict: Dictionary containing the loaded data, extracted 3D array, and final DataFrame.
+        """
         return {
             DATA_3D_ARRAY: self.data_3d_array,
             EXTRACTED_3D_ARRAY: self.extracted_3d_array,
