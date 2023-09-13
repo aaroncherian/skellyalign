@@ -2,6 +2,12 @@ import pandas as pd
 import numpy as np
 
 class ErrorMetricsBuilder:
+    """
+    A class for calculating error metrics from a dataframe containing data from freemocap and qualisys systems . Can return:
+    1) The squared error on each frame for each marker
+    2) The absolute error on each frame for each marker
+    3) The RMSE for each marker, each dimension, and overall
+    """
     def __init__(self, dataframe_of_3d_data):
         self.dataframe_of_3d_data = dataframe_of_3d_data
         self.squared_error_dataframe = None
