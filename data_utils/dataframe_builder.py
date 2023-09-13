@@ -40,7 +40,7 @@ class DataFrameBuilder:
         self.data_3d_array = np.load(self.path_to_data)
         return self
     
-    def extract_common_markers(self):
+    def extract_common_markers(self, markers_to_extract:list):
         """
         Extract markers from a specified list 
         Returns:
@@ -52,7 +52,7 @@ class DataFrameBuilder:
         self.extracted_3d_array = self._extract_specific_markers(
             data_marker_dimension=self.data_3d_array,
             list_of_markers=self.marker_list,
-            markers_to_extract=config.markers_to_extract)
+            markers_to_extract=markers_to_extract)
         return self
 
     def convert_to_dataframe(self, use_extracted=False):

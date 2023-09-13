@@ -1,12 +1,13 @@
 from marker_lists.mediapipe_markers import mediapipe_markers
 from marker_lists.qualisys_markers import qualisys_markers
+import config
 
 from .dataframe_builder import DataFrameBuilder
 import pandas as pd
 
 def load_and_process_data(path_to_freemocap_data, path_to_qualisys_data):
     """
-    Load and process 3D motion capture data from FreeMoCap and Qualisys systems.
+    Load and process 3D motion capture data from FreeMoCap and Qualisys systems with just a specific set of markers
 
     Parameters:
     - path_to_freemocap_data (Path or str): The path to FreeMoCap 3D data file.
@@ -19,7 +20,7 @@ def load_and_process_data(path_to_freemocap_data, path_to_qualisys_data):
     freemocap_builder = DataFrameBuilder(path_to_data=path_to_freemocap_data, marker_list=mediapipe_markers)
     freemocap_data_dict = (freemocap_builder
                     .load_data()
-                    .extract_common_markers()
+                    .extract_common_markers(markers_to_extract=config.markers_to_extract)
                     .convert_to_dataframe(use_extracted=True)
                     .build())
     freemocap_dataframe = freemocap_data_dict['dataframe_of_3d_data']
@@ -28,7 +29,7 @@ def load_and_process_data(path_to_freemocap_data, path_to_qualisys_data):
     qualisys_builder = DataFrameBuilder(path_to_data=path_to_qualisys_data, marker_list=qualisys_markers)
     qualisys_data_dict = (qualisys_builder
                         .load_data()
-                        .extract_common_markers()
+                        .extract_common_markers(markers_to_extract=config.markers_to_extract)
                         .convert_to_dataframe(use_extracted=True)
                         .build())
     qualisys_dataframe = qualisys_data_dict['dataframe_of_3d_data']
