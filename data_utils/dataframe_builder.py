@@ -25,7 +25,6 @@ class DataFrameBuilder:
         """
         self.path_to_data = path_to_data
         self.marker_list = marker_list
-        self.data = {}
         self.data_3d_array = None
         self.extracted_3d_array = None
         self.dataframe_of_3d_data = None
