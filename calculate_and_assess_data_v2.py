@@ -10,6 +10,9 @@ import matplotlib.pyplot as plt
 def calculate_squared_error(value1, value2):
     return (value1 - value2) ** 2
 
+def calculate_absolute_error_from_squared_error(value):
+    return np.sqrt(value)
+
 def calculate_rmse_from_squared_errors(squared_errors):
     mean_squared_error = np.mean(squared_errors)
     root_mean_squared_error = np.sqrt(mean_squared_error)
@@ -63,7 +66,7 @@ def calculate_absolute_error_from_squared(squared_error_df):
     
     # Loop to calculate absolute errors
     for coord in ['x', 'y', 'z']:
-        absolute_error_df[f'{coord}_error'] = np.sqrt(squared_error_df[f'{coord}_error'])
+        absolute_error_df[f'{coord}_error'] = calculate_absolute_error_from_squared_error(squared_error_df[f'{coord}_error'])
         
     return absolute_error_df
 
