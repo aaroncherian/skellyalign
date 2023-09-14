@@ -27,9 +27,13 @@ class ErrorMetricsBuilder:
         Returns:
         - pd.DataFrame: A new DataFrame containing only the squared error calculations.
         """
-        
+        original_order_of_markers = dataframe_of_3d_data['marker'].drop_duplicates().tolist() 
+
         # Pivot the DataFrame so that the 'system' becomes new columns
         pivot_df = dataframe_of_3d_data.pivot_table(index=['frame', 'marker'], columns='system', values=['x', 'y', 'z'])
+
+        pivot_df = pivot_df.reorder_levels(['frame', 'marker']).sort_index()
+        pivot_df = pivot_df.loc[pd.IndexSlice[:, original_order_of_markers], :]
         
         squared_error_dataframe = pd.DataFrame()
         squared_error_dataframe['frame'] = pivot_df.index.get_level_values('frame')
@@ -77,8 +81,8 @@ class ErrorMetricsBuilder:
         rmse_dataframe = pd.DataFrame()
 
         # Calculate RMSE for each joint
-        #groupby partitions the dataframe into smaller groups based on the marker column
-        rmse_joints = self.squared_error_dataframe.groupby('marker')[['x_error', 'y_error', 'z_error']].apply(self._calculate_rmse_from_squared_error).reset_index()
+        #groupby partitions the dataframe into smaller groups based on the marker column, keep sort = False to keep the original order of the markers
+        rmse_joints = self.squared_error_dataframe.groupby('marker', sort = False)[['x_error', 'y_error', 'z_error']].apply(self._calculate_rmse_from_squared_error).reset_index()
         rmse_joints['dimension'] = 'Per Joint'
         rmse_joints = rmse_joints.melt(id_vars=['marker', 'dimension'], var_name='coordinate', value_name='RMSE')
         

@@ -57,7 +57,7 @@ qualisys_data = np.load(qualisys_data_path)
 
 
 freemocap_data_transformed = main(freemocap_data=freemocap_data, qualisys_data=qualisys_data, representative_frame=800)
-np.save(freemocap_output_folder_path/'mediapipe_body_3d_xyz_transformed.npy', freemocap_data_transformed)
+# np.save(freemocap_output_folder_path/'mediapipe_body_3d_xyz_transformed.npy', freemocap_data_transformed)
 
 
 freemocap_df = convert_3d_array_to_dataframe(data_3d_array=freemocap_data_transformed, data_marker_list=mediapipe_markers)
@@ -74,4 +74,5 @@ rmse_per_frame = calculate_rmse_per_frame(freemocap_df=freemocap_df, qualisys_df
 
 # Create a function for plotting
 
-plot_trajectory_with_error_shading(freemocap_df=freemocap_df, qualisys_df=qualisys_df, rmse_per_frame_df=rmse_per_frame, joint_name='left_heel', dimensions=['x', 'y', 'z'])
+fig = plot_trajectory_with_error_shading(freemocap_df=freemocap_df, qualisys_df=qualisys_df, rmse_per_frame_df=rmse_per_frame, joint_name='left_heel', dimensions=['x', 'y', 'z'])
+f = 2 

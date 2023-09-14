@@ -28,14 +28,20 @@ def main(freemocap_data:np.ndarray, qualisys_data:np.ndarray, representative_fra
     return freemocap_data_transformed
 
 if __name__ == "__main__":
+    from pathlib import Path
+
     qualisys_data_path = r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\qualisys_MDN_NIH_Trial3\output_data\clipped_qualisys_skel_3d.npy"
     freemocap_data_path = r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\sesh_2023-05-17_14_53_48_MDN_NIH_Trial3\output_data\mediapipe_body_3d_xyz.npy"
+    freemocap_output_folder_path = Path(r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\sesh_2023-05-17_14_53_48_MDN_NIH_Trial3\output_data")
 
     freemocap_data = np.load(freemocap_data_path)
     qualisys_data = np.load(qualisys_data_path)
 
 
-    main(freemocap_data=freemocap_data, qualisys_data=qualisys_data, representative_frame=300)
+    freemocap_data_transformed = main(freemocap_data=freemocap_data, qualisys_data=qualisys_data, representative_frame=800)
+    np.save(freemocap_output_folder_path/'mediapipe_body_3d_xyz_transformed.npy', freemocap_data_transformed)
+
+
 
 
     
