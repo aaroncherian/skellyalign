@@ -86,7 +86,7 @@ def calculate_max_min_errors(qualisys_data, freemocap_data, qualisys_indices, me
     max_min_errors_df = pd.DataFrame(max_min_errors_list)
     return max_min_errors_df
 
-def plot_trajectory_with_error_shading(freemocap_df, qualisys_df, rmse_per_frame_df, joint_name, dimensions=['x', 'y', 'z']):
+def plot_trajectory_with_error_shading(freemocap_df, qualisys_df, rmse_per_frame_df, joint_name, dimensions=['x']):
     """
     Plot the trajectory for a specific joint across X, Y, Z dimensions with error shading.
     

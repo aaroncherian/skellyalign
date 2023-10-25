@@ -18,7 +18,9 @@ freemocap_output_folder_path = Path(r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\
 path_to_transformed_data = freemocap_output_folder_path/'mediapipe_body_3d_xyz_transformed.npy'
 
 freemocap_data = np.load(freemocap_data_path)
+# freemocap_data = freemocap_data[10:,:,:]
 qualisys_data = np.load(qualisys_data_path)
+# qualisys_data = qualisys_data[10:,:,:]
 
 
 freemocap_data_transformed = main(freemocap_data=freemocap_data, qualisys_data=qualisys_data, representative_frame=800)
