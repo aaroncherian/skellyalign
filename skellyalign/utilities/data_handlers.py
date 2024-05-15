@@ -29,14 +29,14 @@ class DataLoader:
     
 
 class DataProcessor:
-    def __init__(self, data: np.ndarray, marker_list: List[str]):
+    def __init__(self, data: np.ndarray, marker_list: List[str], markers_for_alignment:List[str]):
         self._data = data
         self.marker_list = marker_list
 
-        self._extracted_data = self.extract_markers()
+        self._extracted_data = self.extract_markers(markers_for_alignment)
 
-    def extract_markers(self, markers_to_extract: List[str]):
-        indices = [self.marker_list.index(marker) for marker in markers_to_extract]
+    def extract_markers(self, markers_for_alignment: List[str]):
+        indices = [self.marker_list.index(marker) for marker in markers_for_alignment]
         extracted_data = self._data[:, indices, :]
         return extracted_data
 

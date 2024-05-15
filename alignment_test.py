@@ -131,6 +131,6 @@ if __name__ == "__main__":
         inlier_threshold=60
     )
 
-    from scatter_3d import plot_3d_scatter
+    from skellyalign.plots.scatter_3d import plot_3d_scatter
     plot_3d_scatter(freemocap_data=aligned_freemocap_data, qualisys_data=qualisys_data)
     # np.save(freemocap_output_folder_path/'mediapipe_body_3d_xyz_aligned.npy', aligned_freemocap_data)
