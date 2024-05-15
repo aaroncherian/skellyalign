@@ -18,3 +18,6 @@ sample_recording_config = RecordingConfig(
     inlier_threshold=50
 )
 
+
+from skellyalign.run_alignment import main
+main(sample_recording_config)
