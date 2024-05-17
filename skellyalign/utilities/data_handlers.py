@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from typing import Union, Tuple, Optional, List
-from skellyalign.models.recording_config import RecordingConfig
+from typing import Union, Optional, List
 
 class DataLoader:
     def __init__(self, path: Union[str, Path] = None, data_array: Optional[np.ndarray] = None):
