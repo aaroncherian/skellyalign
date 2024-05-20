@@ -66,12 +66,30 @@ def validate_marker_presence(freemocap_model: Skeleton, qualisys_model: Skeleton
     if missing_in_qualisys:
         raise ValueError(f"These markers for alignment were not found in Qualisys markers: {missing_in_qualisys}")
 
-def run_ransac_spatial_alignment(alignment_config:SpatialAlignmentConfig):
+def run_ransac_spatial_alignment(alignment_config: SpatialAlignmentConfig):
+    """
+    Runs the RANSAC spatial alignment process using the provided configuration.
 
+    Parameters:
+    ----------
+    alignment_config : SpatialAlignmentConfig
+        The configuration for the alignment process.
+
+    Returns:
+    -------
+    aligned_freemocap_data : np.ndarray
+        The aligned FreeMoCap data.
+    best_transformation_matrix : np.ndarray
+        The best transformation matrix obtained from the RANSAC process.
+    """
     freemocap_model = alignment_config.freemocap_skeleton_function()
     qualisys_model = alignment_config.qualisys_skeleton_function()
 
-    validate_marker_presence(freemocap_model=freemocap_model, qualisys_model=qualisys_model, markers_for_alignment=alignment_config.markers_for_alignment)
+    validate_marker_presence(
+        freemocap_model=freemocap_model,
+        qualisys_model=qualisys_model,
+        markers_for_alignment=alignment_config.markers_for_alignment
+    )
 
     freemocap_data = np.load(alignment_config.path_to_freemocap_output_data)
     freemocap_model.integrate_freemocap_3d_data(freemocap_data)
@@ -79,15 +97,29 @@ def run_ransac_spatial_alignment(alignment_config:SpatialAlignmentConfig):
     qualisys_data = np.load(alignment_config.path_to_qualisys_output_data)
     qualisys_model.integrate_freemocap_3d_data(qualisys_data)
 
-    freemocap_data_handler = DataProcessor(data=freemocap_model.marker_data_as_numpy, marker_list=freemocap_model.marker_names, markers_for_alignment=alignment_config.markers_for_alignment)
-    qualisys_data_handler = DataProcessor(data=qualisys_model.marker_data_as_numpy, marker_list=qualisys_model.marker_names, markers_for_alignment=alignment_config.markers_for_alignment)
+    freemocap_data_handler = DataProcessor(
+        data=freemocap_model.marker_data_as_numpy,
+        marker_list=freemocap_model.marker_names,
+        markers_for_alignment=alignment_config.markers_for_alignment
+    )
+    qualisys_data_handler = DataProcessor(
+        data=qualisys_model.marker_data_as_numpy,
+        marker_list=qualisys_model.marker_names,
+        markers_for_alignment=alignment_config.markers_for_alignment
+    )
 
-    best_transformation_matrix = get_best_transformation_matrix_ransac(freemocap_data=freemocap_data_handler.extracted_data_3d, qualisys_data=qualisys_data_handler.extracted_data_3d, frames_to_sample=alignment_config.frames_to_sample, max_iterations=alignment_config.max_iterations, inlier_threshold=alignment_config.inlier_threshold)
-    aligned_freemocap_data = apply_transformation(best_transformation_matrix, freemocap_model.marker_data_as_numpy)
+    best_transformation_matrix = get_best_transformation_matrix_ransac(
+        freemocap_data=freemocap_data_handler.extracted_data_3d,
+        qualisys_data=qualisys_data_handler.extracted_data_3d,
+        frames_to_sample=alignment_config.frames_to_sample,
+        max_iterations=alignment_config.max_iterations,
+        inlier_threshold=alignment_config.inlier_threshold
+    )
+    aligned_freemocap_data = apply_transformation(
+        best_transformation_matrix, freemocap_model.marker_data_as_numpy
+    )
 
     return aligned_freemocap_data, best_transformation_matrix
-
-
     
 
     f = 2
