@@ -25,7 +25,7 @@ import numpy as np
 #     return aligned_freemocap_data
 #     # plot_3d_scatter(freemocap_data=aligned_freemocap_data, qualisys_data=qualisys_dataloader.data_3d)
 
-def validate_marker_presence(freemocap_model: Skeleton, qualisys_model: Skeleton, markers_for_alignment: List[str]):
+def validate_marker_presence(freemocap_skeleton_model: Skeleton, qualisys_skeleton_model: Skeleton, markers_for_alignment: List[str]):
     """
     Validates the presence of alignment markers in both FreeMoCap and Qualisys skeleton models.
 
@@ -35,9 +35,9 @@ def validate_marker_presence(freemocap_model: Skeleton, qualisys_model: Skeleton
 
     Parameters:
     ----------
-    freemocap_model : Skeleton
+    freemocap_skeleton_model : Skeleton
         The FreeMoCap skeleton model containing the marker names.
-    qualisys_model : Skeleton
+    qualisys_skeleton_model : Skeleton
         The Qualisys skeleton model containing the marker names.
     markers_for_alignment : List[str]
         A list of marker names that are required for alignment.
@@ -49,8 +49,8 @@ def validate_marker_presence(freemocap_model: Skeleton, qualisys_model: Skeleton
     """
     
     # Convert marker names from the skeleton models to sets for efficient comparison
-    freemocap_markers = set(freemocap_model.marker_names)
-    qualisys_markers = set(qualisys_model.marker_names)
+    freemocap_markers = set(freemocap_skeleton_model.marker_names)
+    qualisys_markers = set(qualisys_skeleton_model.marker_names)
 
     # Determine which alignment markers are missing in the FreeMoCap model
     missing_in_freemocap = set(markers_for_alignment) - freemocap_markers
@@ -77,34 +77,35 @@ def run_ransac_spatial_alignment(alignment_config: SpatialAlignmentConfig):
 
     Returns:
     -------
-    aligned_freemocap_data : np.ndarray
-        The aligned FreeMoCap data.
+    aligned_freemocap_skeleton_model : Skeleton
+        The aligned FreeMoCap data in a Skeleton model
     best_transformation_matrix : np.ndarray
         The best transformation matrix obtained from the RANSAC process.
     """
-    freemocap_model = alignment_config.freemocap_skeleton_function()
-    qualisys_model = alignment_config.qualisys_skeleton_function()
+    freemocap_skeleton_model = alignment_config.freemocap_skeleton_function()
+    aligned_freemocap_skeleton_model = alignment_config.freemocap_skeleton_function()
+    qualisys_skeleton_model = alignment_config.qualisys_skeleton_function()
 
     validate_marker_presence(
-        freemocap_model=freemocap_model,
-        qualisys_model=qualisys_model,
+        freemocap_skeleton_model=freemocap_skeleton_model,
+        qualisys_skeleton_model=qualisys_skeleton_model,
         markers_for_alignment=alignment_config.markers_for_alignment
     )
 
     freemocap_data = np.load(alignment_config.path_to_freemocap_output_data)
-    freemocap_model.integrate_freemocap_3d_data(freemocap_data)
+    freemocap_skeleton_model.integrate_freemocap_3d_data(freemocap_data)
 
     qualisys_data = np.load(alignment_config.path_to_qualisys_output_data)
-    qualisys_model.integrate_freemocap_3d_data(qualisys_data)
+    qualisys_skeleton_model.integrate_freemocap_3d_data(qualisys_data)
 
     freemocap_data_handler = DataProcessor(
-        data=freemocap_model.marker_data_as_numpy,
-        marker_list=freemocap_model.marker_names,
+        data=freemocap_skeleton_model.marker_data_as_numpy,
+        marker_list=freemocap_skeleton_model.marker_names,
         markers_for_alignment=alignment_config.markers_for_alignment
     )
     qualisys_data_handler = DataProcessor(
-        data=qualisys_model.marker_data_as_numpy,
-        marker_list=qualisys_model.marker_names,
+        data=qualisys_skeleton_model.marker_data_as_numpy,
+        marker_list=qualisys_skeleton_model.marker_names,
         markers_for_alignment=alignment_config.markers_for_alignment
     )
 
@@ -116,10 +117,12 @@ def run_ransac_spatial_alignment(alignment_config: SpatialAlignmentConfig):
         inlier_threshold=alignment_config.inlier_threshold
     )
     aligned_freemocap_data = apply_transformation(
-        best_transformation_matrix, freemocap_model.marker_data_as_numpy
+        best_transformation_matrix, freemocap_skeleton_model.original_marker_data_as_numpy
     )
 
-    return aligned_freemocap_data, best_transformation_matrix
+    aligned_freemocap_skeleton_model.integrate_freemocap_3d_data(aligned_freemocap_data)
+
+    return aligned_freemocap_skeleton_model, best_transformation_matrix
     
 
     f = 2
