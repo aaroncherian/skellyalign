@@ -116,6 +116,9 @@ def run_ransac_spatial_alignment(alignment_config: SpatialAlignmentConfig):
         max_iterations=alignment_config.max_iterations,
         inlier_threshold=alignment_config.inlier_threshold
     )
+
+    print('Best transformation matrix: ', best_transformation_matrix)
+
     aligned_freemocap_data = apply_transformation(
         best_transformation_matrix, freemocap_skeleton_model.original_marker_data_as_numpy
     )
