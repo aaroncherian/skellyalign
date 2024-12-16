@@ -2,8 +2,9 @@ from skellyalign.temporal_alignment.create_temporal_sync_config import create_te
 
 from skellyalign.temporal_alignment.qualisys_data_processing.process_qualisys_tsv import TSVProcessor, JointCenterCalculator, get_unix_start_time
 from skellyalign.temporal_alignment.qualisys_data_processing.joint_center_weights.full_body_joint_center_weights import joint_center_weights
-import pandas as pd
 
+from skellyalign.temporal_alignment.freemocap_data_processing import create_freemocap_unix_timestamps
+from skellyalign.temporal_alignment.qualisys_data_processing.resample_qualisys_data import QualisysResampler
 
 def run_temporal_synchronization(recording_folder_path: str):
     recording_config = create_temporal_sync_config(recording_folder_path)
@@ -21,6 +22,10 @@ def run_temporal_synchronization(recording_folder_path: str):
     joint_center_calculator.calculate_joint_centers()
     joint_center_dataframe = joint_center_calculator.create_dataframe_with_unix_timestamps(unix_start_time=unix_start_time)
 
+    freemocap_timestamps, framerate = create_freemocap_unix_timestamps(csv_path=recording_config.get_component_file_path('freemocap_timestamps', 'timestamps'))
+
+    resampler = QualisysResampler(joint_center_dataframe, freemocap_timestamps, list(joint_center_weights.keys()))
+    resampled_qualisys_data_array = resampler.rotated_resampled_marker_array
     
     f = 2
     
