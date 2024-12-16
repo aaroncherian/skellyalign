@@ -1,6 +1,10 @@
 from dataclasses import dataclass
 from .recording_config import Component
+from skellymodels.model_info.mediapipe_model_info import MediapipeModelInfo
 
+mediapipe_metadata = {
+    'landmark_names':MediapipeModelInfo.landmark_names
+}
 @dataclass
 class MediaPipeComponent(Component):
     """Pre-configured MediaPipe component"""
@@ -10,3 +14,13 @@ class MediaPipeComponent(Component):
             files={'body': 'mediapipe_body_3d_xyz.npy'},
             base_folder=None
         )
+        
+        # Add MediaPipe-specific metadata
+        mediapipe_metadata = {
+            'landmark_names': MediapipeModelInfo.landmark_names
+        }
+        for key, value in mediapipe_metadata.items():
+            self.metadata.add(key, value)
+
+        
+        

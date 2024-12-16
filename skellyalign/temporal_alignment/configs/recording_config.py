@@ -1,13 +1,64 @@
 from dataclasses import dataclass, field
-from typing import Union, Dict, Optional
+from typing import Union, Dict, Optional, Any
 from pathlib import Path
 
+
+@dataclass
+class ComponentMetadata:
+    """Metadata for a given component"""
+    _metadata: Dict[str, Any] = field(default_factory=dict)
+
+    def add(self, key: str, value: Any) -> None:
+        """
+        Add metadata to the component
+        
+        Args:
+            key: Metadata key
+            value: Metadata value
+        """
+        self._metadata[key] = value
+    
+    def get(self, key: str, default = None) -> Any:
+        """
+        Get metadata value
+        
+        Args:
+            key: Metadata key
+            default: Default value to return if key not found
+        
+        Returns:
+            Metadata value or default if key not found
+        """
+        value = self._metadata.get(key, default)
+        if value is None:
+            print(f"Warning: Metadata key '{key}' not found")
+        return value
+    
+    def has(self, key: str) -> bool:
+        """
+        Check if metadata key exists
+    
+        Args:
+            key: Metadata key
+        
+        Returns:
+            True if key exists, False otherwise
+        """
+        return key in self._metadata
+    
+    def __getitem__(self, key: str) -> Any:
+        return self._metadata[key]
+        
+    def __str__(self) -> str:
+        return str(self._metadata)
 
 @dataclass
 class Component:
     name: str
     files: Dict[str,str]
     base_folder: Optional[str] = None
+    metadata: ComponentMetadata = field(default_factory=ComponentMetadata)
+
 
     def __post_init__(self):
         if not self.files:
@@ -63,7 +114,8 @@ class Recording:
     def add_component(self, 
                      name: str, 
                      files: Dict[str, str], 
-                     base_folder: Optional[str] = None) -> None:
+                     base_folder: Optional[str] = None,
+                     metadata: Optional[Dict[str, Any]] = None) -> Component:
         """
         Add a component to the session
         
@@ -76,7 +128,15 @@ class Recording:
             ValueError: If any specified files don't exist or if files dict is empty
         """
         self._validate_component_files(name, files, base_folder)
-        self.components[name] = Component(name=name, files=files, base_folder=base_folder)
+        # self.components[name] = Component(name=name, files=files, base_folder=base_folder)
+        component = Component(name=name, files=files, base_folder=base_folder)
+
+        if metadata:
+            for key, value in metadata.items():
+                component.metadata.add(key, value)
+        
+        self.components[name] = component
+        return component
 
     def add_prepared_component(self, component: Component) -> None:
         """
@@ -125,6 +185,8 @@ if __name__ == "__main__":
         recording_folder_path=r"D:\2024-10-30_treadmill_pilot\processed_data\sesh_2024-10-30_15_45_14_mdn_gait_7_exposure",
     )
 
+    
+    mediapipe_metadata = {'name': 'mediapipe'}
 
     recording.add_component(
         name = 'mediapipe',
@@ -132,8 +194,13 @@ if __name__ == "__main__":
             'body': 'mediapipe_body_3d_xyz.npy'
         },
         base_folder=None,
+        metadata=mediapipe_metadata
     )
 
     print(recording.components)
     print(recording.get_component_file_path('mediapipe', 'body'))
     print(recording.components['mediapipe'].files)
+    print(recording.components['mediapipe'].metadata)
+    print(recording.components['mediapipe'].metadata.get('name'))
+    print(recording.components['mediapipe'].metadata.get('non_existent_key'))
+    print(recording.components['mediapipe'].metadata.has('name'))

@@ -8,7 +8,7 @@ def create_temporal_sync_config(recording_folder_path: Union[str, Path]) -> Reco
     recording = Recording(
         recording_folder_path=recording_folder_path,
     )
-
+    
     recording.add_prepared_component(
         MediaPipeComponent()
     )
