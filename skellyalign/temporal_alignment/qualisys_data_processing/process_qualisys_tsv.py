@@ -138,9 +138,9 @@ class JointCenterCalculator:
         df['unix_timestamps'] = adjusted_time + unix_start_timestamp
         return df
     
-    def create_dataframe_with_unix_timestamps(self, unix_start_time: float) -> pd.DataFrame:
+    def create_dataframe_with_unix_timestamps(self, unix_start_time: float, lag_in_seconds: float = 0) -> pd.DataFrame:
         joint_center_df = self.create_joint_center_df()
-        return self.add_unix_timestamps(joint_center_df, unix_start_time)
+        return self.add_unix_timestamps(joint_center_df, unix_start_time, lag_in_seconds)
 
     
 

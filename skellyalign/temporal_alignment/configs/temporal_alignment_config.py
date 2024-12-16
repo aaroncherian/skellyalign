@@ -9,7 +9,7 @@ class LagCorrectionSystemComponent:
     list_of_joint_center_names: list
 
     def __post_init__(self):
-        if len(self.joint_center_array) != len(self.list_of_joint_center_names):
+        if self.joint_center_array.shape[1] != len(self.list_of_joint_center_names):
             raise ValueError(f"Number of joint centers: {len(self.joint_center_array)} must match the number of joint center names: {len(self.list_of_joint_center_names)}")
         
 @dataclass
@@ -17,6 +17,23 @@ class LagCorrector:
     freemocap_component: LagCorrectionSystemComponent
     qualisys_component: LagCorrectionSystemComponent
     framerate: float
+
+    def run(self):  
+        common_joint_center_names = self.get_common_joint_center_names(
+            self.freemocap_component.list_of_joint_center_names,
+            self.qualisys_component.list_of_joint_center_names
+        )
+
+        optimal_lag_list = self.calculate_lag_for_common_joints(
+            freemocap_joint_centers_array=self.freemocap_component.joint_center_array,
+            qualisys_joint_centers_array=self.qualisys_component.joint_center_array,
+            freemoocap_joint_centers_names=self.freemocap_component.list_of_joint_center_names,
+            qualisys_joint_centers_names=self.qualisys_component.list_of_joint_center_names,
+            common_joint_centers=common_joint_center_names
+        )
+        
+        return optimal_lag_list
+
 
     def get_common_joint_center_names(self, freemocap_joint_center_names, qualisys_joint_center_names):
         return list(set(freemocap_joint_center_names) & set(qualisys_joint_center_names))
@@ -37,10 +54,11 @@ class LagCorrector:
             qualisys_joint_data = qualisys_joint_centers_array[:,qualisys_joint_idx,:]
             freemocap_joint_data = freemocap_joint_centers_array[:,freemocap_joint_idx,:]
 
-            lag = self.calculate_lag(freemocap_joint_data, qualisys_joint_data)
-            print(f"Lags per dimension for joint center {joint_center}: {lag}")
+            lags_for_joint = self.calculate_lag(freemocap_joint_data, qualisys_joint_data)
+            print(f"Lags per dimension for joint center {joint_center}: {lags_for_joint}")
+            optimal_lag_list.append(lags_for_joint) 
 
-        optimal_lag_list.append(lag)
+        return optimal_lag_list
 
     def calculate_lag(self,
                       freemocap_joint_centers_array:np.ndarray,
@@ -76,9 +94,9 @@ class LagCorrector:
             # Find the lag that maximizes the cross-correlation
             optimal_lag = np.argmax(cross_corr) - (len(normalized_qualisys) - 1)
             optimal_lags.append(optimal_lag)
-        
-        optimal_lags = np.array(optimal_lags)
-        return optimal_lag
+
+            self.optimal_lags = optimal_lags
+        return np.array(optimal_lags)
 
 
     def normalize(self, 
@@ -93,3 +111,13 @@ class LagCorrector:
                 np.ndarray: The normalized signal.
             """
             return (signal - signal.mean()) / signal.std()
+
+    @property
+    def median_lag(self):
+        return int(np.median(self.optimal_lags))
+    
+    def get_lag_in_seconds(self, lag=None):
+        """Calculate lag in seconds using median lag by default."""
+        if lag is None:
+            lag = self.median_lag
+        return lag / self.framerate
