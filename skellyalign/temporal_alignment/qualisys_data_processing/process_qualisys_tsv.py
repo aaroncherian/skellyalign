@@ -36,7 +36,7 @@ class TSVProcessor:
                     return i + 1
         raise ValueError("Header not found in the TSV file.")
 
-    def get_qualisys_marker_tsv_data(self) -> pd.DataFrame:
+    def clean_up_qualisys_tsv(self) -> pd.DataFrame:
         """Return the cleaned and loaded TSV data."""
         if self.data is None:
             self.load_tsv()
@@ -94,6 +94,8 @@ class JointCenterCalculator:
                 weights_matrix[j_idx, marker_idx, :] = weight  # Assign 3D weight
 
         self.joint_centers = np.einsum('fmd,jmd->fjd', self.marker_array, weights_matrix)
+
+        return self.joint_centers
 
 
     def create_joint_center_df(self) -> pd.DataFrame:

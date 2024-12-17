@@ -12,6 +12,9 @@ import numpy as np
 
 from typing import List
 
+from skellyalign.temporal_alignment.temporal_synchronizer import TemporalSynchronizer
+
+
 def validate_required_metadata(component_name: str, required_keys: List[str]):
     component = recording_config.components[component_name]
     for key in required_keys:
@@ -20,60 +23,63 @@ def validate_required_metadata(component_name: str, required_keys: List[str]):
 
 def run_temporal_synchronization(recording_config: Recording):
 
-    validate_required_metadata('qualisys_exported_markers', ['joint_center_weights', 'joint_center_names'])
+    temporal_synchronizer = TemporalSynchronizer(recording_config)
+    temporal_synchronizer.align_data()
+
+    # validate_required_metadata('qualisys_exported_markers', ['joint_center_weights', 'joint_center_names'])
 
     
-    qualisys_joint_center_weights = recording_config.components['qualisys_exported_markers'].metadata.get('joint_center_weights')
-    qualisys_joint_center_names = recording_config.components['qualisys_exported_markers'].metadata.get('joint_center_names')
+        # qualisys_joint_center_weights = recording_config.components['qualisys_exported_markers'].metadata.get('joint_center_weights')
+    # qualisys_joint_center_names = recording_config.components['qualisys_exported_markers'].metadata.get('joint_center_names')
 
-    freemocap_joint_center_names = recording_config.components['mediapipe'].metadata.get('landmark_names')
+    # freemocap_joint_center_names = recording_config.components['mediapipe'].metadata.get('landmark_names')
 
 
-    qualisys_marker_tsv_path = recording_config.get_component_file_path('qualisys_exported_markers', 'markers')
-    unix_start_time = get_unix_start_time(qualisys_marker_tsv_path)
+    # qualisys_marker_tsv_path = recording_config.get_component_file_path('qualisys_exported_markers', 'markers')
+    # unix_start_time = get_unix_start_time(qualisys_marker_tsv_path)
 
     
-    qualisys_tsv_processor = TSVProcessor(qualisys_marker_tsv_path)
-    qualisys_marker_and_timestamp_dataframe = qualisys_tsv_processor.get_qualisys_marker_tsv_data()
+    # qualisys_tsv_processor = TSVProcessor(qualisys_marker_tsv_path)
+    # qualisys_marker_and_timestamp_dataframe = qualisys_tsv_processor.clean_up_qualisys_tsv()
 
-    joint_center_calculator = JointCenterCalculator(
-        marker_and_timestamp_df=qualisys_marker_and_timestamp_dataframe,
-        joint_center_weights=qualisys_joint_center_weights
-    )
-    joint_center_calculator.calculate_joint_centers()
-    joint_center_dataframe = joint_center_calculator.create_dataframe_with_unix_timestamps(unix_start_time=unix_start_time)
+    # joint_center_calculator = JointCenterCalculator(
+    #     marker_and_timestamp_df=qualisys_marker_and_timestamp_dataframe,
+    #     joint_center_weights=qualisys_joint_center_weights
+    # )
+    # joint_center_calculator.calculate_joint_centers()
+    # joint_center_dataframe = joint_center_calculator.create_dataframe_with_unix_timestamps(unix_start_time=unix_start_time)
 
-    freemocap_timestamps, framerate = create_freemocap_unix_timestamps(csv_path=recording_config.get_component_file_path('freemocap_timestamps', 'timestamps'))
+    # freemocap_timestamps, framerate = create_freemocap_unix_timestamps(csv_path=recording_config.get_component_file_path('freemocap_timestamps', 'timestamps'))
 
-    resampler = QualisysResampler(joint_center_dataframe, freemocap_timestamps, qualisys_joint_center_names)
-    qualisys_joint_centers_resampled_rotated = resampler.rotated_resampled_marker_array
+    # resampler = QualisysResampler(joint_center_dataframe, freemocap_timestamps, qualisys_joint_center_names)
+    # qualisys_joint_centers_resampled_rotated = resampler.rotated_resampled_marker_array
 
-    freemocap_joint_centers = np.load(recording_config.get_component_file_path('mediapipe', 'body'))
+    # freemocap_joint_centers = np.load(recording_config.get_component_file_path('mediapipe', 'body'))
 
-    freemocap_joint_centers_rotated = run_skellyforge_rotation(raw_skeleton_data=freemocap_joint_centers, landmark_names=freemocap_joint_center_names)
+    # freemocap_joint_centers_rotated = run_skellyforge_rotation(raw_skeleton_data=freemocap_joint_centers, landmark_names=freemocap_joint_center_names)
     
-    freemocap_component = LagCorrectionSystemComponent(joint_center_array=freemocap_joint_centers_rotated, list_of_joint_center_names=freemocap_joint_center_names)
-    qualisys_component = LagCorrectionSystemComponent(joint_center_array=qualisys_joint_centers_resampled_rotated, list_of_joint_center_names=qualisys_joint_center_names)
+    # freemocap_component = LagCorrectionSystemComponent(joint_center_array=freemocap_joint_centers_rotated, list_of_joint_center_names=freemocap_joint_center_names)
+    # qualisys_component = LagCorrectionSystemComponent(joint_center_array=qualisys_joint_centers_resampled_rotated, list_of_joint_center_names=qualisys_joint_center_names)
     
-    lag_corrector =LagCorrector(freemocap_component=freemocap_component, qualisys_component=qualisys_component, framerate=framerate)
-    lag_corrector.run()
+    # lag_corrector =LagCorrector(freemocap_component=freemocap_component, qualisys_component=qualisys_component, framerate=framerate)
+    # lag_corrector.run()
 
-    median_lag = lag_corrector.median_lag
-    print(f"Median lag: {median_lag}")
+    # median_lag = lag_corrector.median_lag
+    # print(f"Median lag: {median_lag}")
 
-    lag_in_seconds = lag_corrector.get_lag_in_seconds()
+    # lag_in_seconds = lag_corrector.get_lag_in_seconds()
 
-    lag_corrected_dataframe = joint_center_calculator.create_dataframe_with_unix_timestamps(unix_start_time=unix_start_time, lag_in_seconds=lag_in_seconds)
-    resampler_two = QualisysResampler(lag_corrected_dataframe, freemocap_timestamps, qualisys_joint_center_names)
-    qualisys_joint_centers_resampled_rotated_two = resampler_two.rotated_resampled_marker_array
+    # lag_corrected_dataframe = joint_center_calculator.create_dataframe_with_unix_timestamps(unix_start_time=unix_start_time, lag_in_seconds=lag_in_seconds)
+    # resampler_two = QualisysResampler(lag_corrected_dataframe, freemocap_timestamps, qualisys_joint_center_names)
+    # qualisys_joint_centers_resampled_rotated_two = resampler_two.rotated_resampled_marker_array
 
-    qualisys_component_two = LagCorrectionSystemComponent(joint_center_array=qualisys_joint_centers_resampled_rotated_two, list_of_joint_center_names=qualisys_joint_center_names)
-    lag_corrector_two = LagCorrector(freemocap_component=freemocap_component, qualisys_component=qualisys_component_two, framerate=framerate)
+    # qualisys_component_two = LagCorrectionSystemComponent(joint_center_array=qualisys_joint_centers_resampled_rotated_two, list_of_joint_center_names=qualisys_joint_center_names)
+    # lag_corrector_two = LagCorrector(freemocap_component=freemocap_component, qualisys_component=qualisys_component_two, framerate=framerate)
 
-    lag_corrector_two.run()
-    median_lag_two = lag_corrector_two.median_lag
-    print(f"Median lag after second correction: {median_lag_two}")
-    f = 2
+    # lag_corrector_two.run()
+    # median_lag_two = lag_corrector_two.median_lag
+    # print(f"Median lag after second correction: {median_lag_two}")
+    # f = 2
     
 
 
