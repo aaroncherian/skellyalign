@@ -66,13 +66,13 @@ class QualisysMarkerData:
 
 class QualisysJointCenterData:
 
-    def __init__(self, marker_data:QualisysMarkerData, weights:Dict):
-        self.marker_data = marker_data
+    def __init__(self, marker_data_holder:QualisysMarkerData, weights:Dict):
+        self.marker_data = marker_data_holder
         self.weights = weights
         self.joint_names = list(weights.keys())
         self.joint_centers = self._calculate_joint_centers(
-            marker_data_array=marker_data.marker_array,
-            marker_names=marker_data.marker_names,
+            marker_data_array=marker_data_holder.marker_array,
+            marker_names=marker_data_holder.marker_names,
             joint_center_weights=weights
         )
 
@@ -89,6 +89,7 @@ class QualisysJointCenterData:
         Result:
             np.ndarray: Joint centers with shape (num_frames, num_joints, 3).
         """
+        print('Calculating joint centers...')
         num_frames, num_markers, _ = marker_data_array.shape
         num_joints = len(joint_center_weights)
 
@@ -120,14 +121,15 @@ class QualisysJointCenterData:
         return df
 
 
-
 class DataResampler:
     def __init__(self, data_with_unix_timestamps:pd.DataFrame, freemocap_timestamps: pd.Series):
         self.joint_centers_with_unix_timestamps = data_with_unix_timestamps
         self.freemocap_timestamps = freemocap_timestamps
-        self.resampled_qualisys_data = self.resample_qualisys_data(self.joint_centers_with_unix_timestamps, self.freemocap_timestamps)
     
-    def resample_qualisys_data(self, qualisys_df, freemocap_timestamps):
+    def resample(self):
+        self.resampled_qualisys_data = self._resample(self.joint_centers_with_unix_timestamps, self.freemocap_timestamps)
+
+    def _resample(self, qualisys_df, freemocap_timestamps):
         """
         Resample Qualisys data to match FreeMoCap timestamps using bin averaging.
         
@@ -191,7 +193,6 @@ class DataResampler:
     def resampled_marker_array(self):
         return self._create_marker_array()
     
-    @property 
     def rotated_resampled_marker_array(self, joint_center_names:List[str]):
         return run_skellyforge_rotation(self.resampled_marker_array, joint_center_names)
     
