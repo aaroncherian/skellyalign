@@ -1,10 +1,8 @@
-from dataclasses import dataclass
 import numpy as np
-
-
+from dataclasses import dataclass
 
 @dataclass
-class LagCorrectionSystemComponent:
+class LagCalculatorComponent:
     joint_center_array: np.ndarray
     list_of_joint_center_names: list
 
@@ -12,11 +10,12 @@ class LagCorrectionSystemComponent:
         if self.joint_center_array.shape[1] != len(self.list_of_joint_center_names):
             raise ValueError(f"Number of joint centers: {self.joint_center_array.shape} must match the number of joint center names: {len(self.list_of_joint_center_names)}")
         
-@dataclass
-class LagCorrector:
-    freemocap_component: LagCorrectionSystemComponent
-    qualisys_component: LagCorrectionSystemComponent
-    framerate: float
+
+class LagCalculator:
+    def __init__(self, freemocap_component: LagCalculatorComponent, qualisys_component: LagCalculatorComponent, framerate: float):
+        self.freemocap_component = freemocap_component
+        self.qualisys_component = qualisys_component
+        self.framerate = framerate
 
     def run(self):  
         common_joint_center_names = self.get_common_joint_center_names(

@@ -1,24 +1,24 @@
-from dataclasses import dataclass
 import pandas as pd
 import numpy as np
+from typing import List
+from skellyalign.temporal_alignment.run_skellyforge_rotation import run_skellyforge_rotation
 
-from  skellyalign.temporal_alignment.run_skellyforge_rotation import run_skellyforge_rotation
-@dataclass
-class QualisysResampler:
-    joint_centers_with_unix_timestamps: pd.DataFrame
-    freemocap_timestamps: pd.Series
-    joint_center_names: list
 
-    def __post_init__(self):
-        self.resampled_qualisys_data = self.resample_qualisys_data(self.joint_centers_with_unix_timestamps, self.freemocap_timestamps)
+class DataResampler:
+    def __init__(self, data_with_unix_timestamps:pd.DataFrame, freemocap_timestamps: pd.Series):
+        self.joint_centers_with_unix_timestamps = data_with_unix_timestamps
+        self.freemocap_timestamps = freemocap_timestamps
+    
+    def resample(self):
+        self.resampled_qualisys_data = self._resample(self.joint_centers_with_unix_timestamps, self.freemocap_timestamps)
 
-    def resample_qualisys_data(self, qualisys_df, freemocap_timestamps):
+    def _resample(self, qualisys_df, freemocap_timestamps):
         """
         Resample Qualisys data to match FreeMoCap timestamps using bin averaging.
         
         Parameters:
         -----------
-        qualisys_df : pandas.DataFrame
+        data_with_unix_timestamps : pandas.DataFrame
             DataFrame with Frame, Time, unix_timestamps and data columns
         freemocap_timestamps : pandas.Series
             Target timestamps to resample to
@@ -76,7 +76,6 @@ class QualisysResampler:
     def resampled_marker_array(self):
         return self._create_marker_array()
     
-    @property 
-    def rotated_resampled_marker_array(self):
-        return run_skellyforge_rotation(self.resampled_marker_array, self.joint_center_names)
+    def rotated_resampled_marker_array(self, joint_center_names:List[str]):
+        return run_skellyforge_rotation(self.resampled_marker_array, joint_center_names)
     

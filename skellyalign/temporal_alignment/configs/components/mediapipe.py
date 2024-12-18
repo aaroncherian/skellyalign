@@ -1,11 +1,9 @@
-from dataclasses import dataclass
-from .recording_config import Component
+from skellyalign.temporal_alignment.configs.recording_config import Component
 from skellymodels.model_info.mediapipe_model_info import MediapipeModelInfo
 
 mediapipe_metadata = {
     'landmark_names':MediapipeModelInfo.landmark_names
 }
-@dataclass
 class MediaPipeComponent(Component):
     """Pre-configured MediaPipe component"""
     def __init__(self):

@@ -2,11 +2,10 @@ from dataclasses import dataclass, field
 from typing import Union, Dict, Optional, Any
 from pathlib import Path
 
-
-@dataclass
 class ComponentMetadata:
     """Metadata for a given component"""
-    _metadata: Dict[str, Any] = field(default_factory=dict)
+    def __init__(self):
+        self._metadata = {}
 
     def add(self, key: str, value: Any) -> None:
         """
@@ -64,17 +63,18 @@ class Component:
         if not self.files:
             raise ValueError(f"Component {self.name} must have at least one file specified")
         
-@dataclass
-class Recording:
-    recording_folder_path: Union[str, Path]
-    components: Dict[str, Component] = field(default_factory=dict)
-
-    def __post_init__(self):
-        self.recording_folder_path = Path(self.recording_folder_path)
+class Recording:  # Regular class
+    def __init__(self, recording_folder_path: Union[str, Path]):
+        self.recording_folder_path = Path(recording_folder_path)
         if not self.recording_folder_path.exists():
             raise ValueError(f"Recording folder path does not exist: {self.recording_folder_path}")
     
+        self.components: Dict[str, Component] = {}
     
+    @property
+    def output_path(self) -> Path:
+        return self.recording_folder_path / 'output_data'
+
     @property
     def output_path(self) -> Path:
         return self.recording_folder_path / 'output_data'
