@@ -31,9 +31,15 @@ class TemporalSyncManager:
 
         print('Initial lag:', initial_lag)
         print('Final lag:', final_lag)
-        f =2 
         ##this is for synchronizing the original non-joint center marker data as well so I can use it for trc creation 02/18/25
-        
+        resampler = DataResampler(self.qualisys_marker_data_holder.as_dataframe_with_unix_timestamps(lag_seconds=initial_lag), self.freemocap_timestamps)
+        resampler.resample()
+
+        marker_data_synced = resampler.as_dataframe
+
+        return marker_data_synced
+
+        f = 2 
 
     def _process_qualisys_data(self):
 
@@ -44,6 +50,7 @@ class TemporalSyncManager:
         
         qualisys_marker_data_holder = QualisysMarkerData(qualisys_marker_tsv_path)
         qualisys_marker_data_holder.load_tsv()
+        self.qualisys_marker_data_holder = qualisys_marker_data_holder
 
         self.qualisys_joint_center_data_holder = QualisysJointCenterData(
             marker_data_holder=qualisys_marker_data_holder,
@@ -93,3 +100,4 @@ class TemporalSyncManager:
             'freemocap_timestamps', 'timestamps'
         )
         self.freemocap_timestamps, self.framerate = create_freemocap_unix_timestamps(csv_path=timestamps_path)
+        f = 2

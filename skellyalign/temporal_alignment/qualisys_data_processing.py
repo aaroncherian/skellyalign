@@ -64,9 +64,26 @@ class QualisysMarkerData:
         raise ValueError(f"No TIME_STAMP found in file: {self.file_path}")
     
     def as_dataframe_with_unix_timestamps(self, lag_seconds: float = 0) -> pd.DataFrame:
-        df = self.as_dataframe()
-        df['unix_timestamps'] = df['Time'] + self.marker_data.unix_start_time + lag_seconds
+        """
+        Returns a DataFrame with marker data and corresponding Unix timestamps.
+        
+        Parameters:
+            lag_seconds (float): Optional time offset to adjust timestamps.
+        
+        Returns:
+            pd.DataFrame: DataFrame containing frame, time, markers, and Unix timestamps.
+        """
+        df = self.time_and_frame_columns.copy()
+        
+        # Extract marker data and add to the DataFrame
+        marker_data = self._extract_marker_data()
+        df = pd.concat([df, marker_data], axis=1)
+
+        # Compute Unix timestamps
+        df['unix_timestamps'] = df['Time'] + self.unix_start_time + lag_seconds
+
         return df
+
 
 class QualisysJointCenterData:
 
@@ -200,6 +217,13 @@ class DataResampler:
     
     def rotated_resampled_marker_array(self, joint_center_names:List[str]):
         return run_skellyforge_rotation(self.resampled_marker_array, joint_center_names)
+    
+    @property
+    def as_dataframe(self) -> pd.DataFrame:
+        """Returns the resampled marker data as a DataFrame."""
+        if not hasattr(self, 'resampled_qualisys_data'):
+            raise AttributeError("No data available to return. Run `.resample()` first.")
+        return self.resampled_qualisys_data
     
 
 
