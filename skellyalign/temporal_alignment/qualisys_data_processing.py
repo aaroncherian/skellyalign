@@ -152,10 +152,11 @@ class DataResampler:
 
         if isinstance(freemocap_timestamps, pd.Series):
             freemocap_timestamps = freemocap_timestamps.to_numpy()
-        
-        bins = np.append(freemocap_timestamps, freemocap_timestamps[-1] + 
-                    (freemocap_timestamps[-1] - freemocap_timestamps[-2]))
-    
+
+        freemocap_timestamps = np.sort(freemocap_timestamps)
+
+        bin_extension = freemocap_timestamps[-1] + max(1e-6, np.min(np.diff(freemocap_timestamps))) #this 'extension' makes sure that the timestamps aren't too close for the purposes of binning. Too close values led to some 'bins must be non-monotonic errors'
+        bins = np.append(freemocap_timestamps, bin_extension)
         # Assign each row to a bin (-1 means it's after the last timestamp)
         qualisys_df['bin'] = pd.cut(qualisys_df['unix_timestamps'], 
                                 bins=bins, 
