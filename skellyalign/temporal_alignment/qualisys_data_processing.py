@@ -3,7 +3,7 @@ from typing import List, Dict, Tuple
 from pathlib import Path
 import pandas as pd
 import numpy as np
-from skellyalign.temporal_alignment.run_skellyforge_rotation import run_skellyforge_rotation
+from skellyalign.temporal_alignment.utils.rotation import run_skellyforge_rotation
 from datetime import datetime
 
 class QualisysMarkerData:
@@ -63,6 +63,10 @@ class QualisysMarkerData:
                     return datetime_obj.timestamp()
         raise ValueError(f"No TIME_STAMP found in file: {self.file_path}")
     
+    def as_dataframe_with_unix_timestamps(self, lag_seconds: float = 0) -> pd.DataFrame:
+        df = self.as_dataframe()
+        df['unix_timestamps'] = df['Time'] + self.marker_data.unix_start_time + lag_seconds
+        return df
 
 class QualisysJointCenterData:
 

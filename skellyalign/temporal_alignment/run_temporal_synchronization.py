@@ -21,7 +21,7 @@ def run_temporal_synchronization(recording_config: Recording):
 
 if __name__ == '__main__':
     from skellyalign.temporal_alignment.create_temporal_sync_config import create_temporal_sync_config
-    from skellyalign.temporal_alignment.qualisys_processing.joint_center_weights.full_body_joint_center_weights import joint_center_weights
+    from skellyalign.temporal_alignment.marker_sets.full_body_joint_center_weights import joint_center_weights
 
     def setup_recording_config(path: str) -> Recording:
         config = create_temporal_sync_config(path)

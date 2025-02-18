@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from skellyalign.temporal_alignment.run_skellyforge_rotation import run_skellyforge_rotation
+from skellyalign.temporal_alignment.utils.rotation import run_skellyforge_rotation
 
 def create_freemocap_unix_timestamps(csv_path):
     df = pd.read_csv(csv_path)

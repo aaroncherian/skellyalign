@@ -1,5 +1,5 @@
 from .configs.recording_config import Recording
-from .configs.pre_configured_components import MediaPipeComponent
+from .configs.components.mediapipe import MediaPipeComponent
 from typing import Union, Optional, List
 from pathlib import Path
 

@@ -5,7 +5,7 @@ from typing import List
 
 
 from skellyalign.temporal_alignment.freemocap_data_processing import create_freemocap_unix_timestamps, FreeMoCapData
-from skellyalign.temporal_alignment.configs.temporal_alignment_config import LagCorrectionSystemComponent, LagCorrector
+from skellyalign.temporal_alignment.synchronizing.lag_calculation import LagCalculatorComponent, LagCalculator
 from skellyalign.temporal_alignment.qualisys_data_processing import QualisysMarkerData, QualisysJointCenterData, DataResampler
  
 class TemporalSyncManager:
@@ -31,6 +31,9 @@ class TemporalSyncManager:
 
         print('Initial lag:', initial_lag)
         print('Final lag:', final_lag)
+        f =2 
+        ##this is for synchronizing the original non-joint center marker data as well so I can use it for trc creation 02/18/25
+        
 
     def _process_qualisys_data(self):
 
@@ -59,23 +62,23 @@ class TemporalSyncManager:
             landmark_names=joint_center_names
         )
 
-        self.freemocap_component = LagCorrectionSystemComponent(
+        self.freemocap_component = LagCalculatorComponent(
             joint_center_array=rotated_freemocap_data, 
             list_of_joint_center_names=joint_center_names)
 
-    def _create_qualisys_component(self, lag_in_seconds:float = 0) -> LagCorrectionSystemComponent: 
+    def _create_qualisys_component(self, lag_in_seconds:float = 0) -> LagCalculatorComponent: 
         self._validate_required_metadata('qualisys_exported_markers', ['joint_center_names'])
         joint_center_names = self.recording_config.components['qualisys_exported_markers'].metadata.get('joint_center_names')
         df = self.qualisys_joint_center_data_holder.as_dataframe_with_unix_timestamps(lag_seconds=lag_in_seconds)
         resampler = DataResampler(df, self.freemocap_timestamps)
         resampler.resample()
-        return LagCorrectionSystemComponent(
+        return LagCalculatorComponent(
             joint_center_array=resampler.rotated_resampled_marker_array(joint_center_names),
             list_of_joint_center_names=joint_center_names
         )
 
-    def _calculate_lag(self, qualisys_component: LagCorrectionSystemComponent):
-        lag_corrector = LagCorrector(
+    def _calculate_lag(self, qualisys_component: LagCalculatorComponent):
+        lag_corrector = LagCalculator(
             freemocap_component=self.freemocap_component, 
             qualisys_component=qualisys_component, 
             framerate=self.framerate)

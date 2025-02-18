@@ -1,6 +1,8 @@
 from pathlib import Path
 import numpy as np
-from skellyforge import TaskWorkerThread, default_settings, TASK_INTERPOLATION, TASK_FILTERING, TASK_FINDING_GOOD_FRAME, TASK_SKELETON_ROTATION
+from skellyforge.freemocap_utils.postprocessing_widgets.task_worker_thread import TaskWorkerThread
+from skellyforge.freemocap_utils.config import default_settings
+from skellyforge.freemocap_utils.constants import TASK_INTERPOLATION, TASK_FILTERING, TASK_FINDING_GOOD_FRAME, TASK_SKELETON_ROTATION
 
 
 def run_skellyforge_rotation(raw_skeleton_data:np.ndarray, landmark_names:list,):
