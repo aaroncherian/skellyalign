@@ -18,6 +18,7 @@ def create_temporal_sync_config(recording_folder_path: Union[str, Path]) -> Reco
     files = {
         'timestamps': 'unix_synced_timestamps.csv'
     },
+    
 )
 
     recording.add_component(

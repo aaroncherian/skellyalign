@@ -7,7 +7,10 @@ from typing import List
 from skellyalign.temporal_alignment.freemocap_data_processing import create_freemocap_unix_timestamps, FreeMoCapData
 from skellyalign.temporal_alignment.synchronizing.lag_calculation import LagCalculatorComponent, LagCalculator
 from skellyalign.temporal_alignment.qualisys_data_processing import QualisysMarkerData, QualisysJointCenterData, DataResampler
- 
+
+from skellyalign.temporal_alignment.temp_sync_visualizer import SynchronizationVisualizer
+from nicegui import ui
+
 class TemporalSyncManager:
     def __init__(self, recording_config: Recording):
         self.recording_config = recording_config
@@ -31,13 +34,25 @@ class TemporalSyncManager:
 
         print('Initial lag:', initial_lag)
         print('Final lag:', final_lag)
+
         ##this is for synchronizing the original non-joint center marker data as well so I can use it for trc creation 02/18/25
         resampler = DataResampler(self.qualisys_marker_data_holder.as_dataframe_with_unix_timestamps(lag_seconds=initial_lag), self.freemocap_timestamps)
         resampler.resample()
 
         marker_data_synced = resampler.as_dataframe
 
-        return marker_data_synced
+        visualizer = SynchronizationVisualizer(
+            freemocap_component = self.freemocap_component,
+            original_qualisys_component= qualisys_component,
+            corrected_qualisys_component= corrected_qualisys_component,
+            framerate=self.framerate
+        )
+
+        visualizer.create_ui()
+        ui.run()
+
+
+        return marker_data_synced, self.resampled_qualisys_joint_center_data
 
         f = 2 
 
@@ -79,6 +94,7 @@ class TemporalSyncManager:
         df = self.qualisys_joint_center_data_holder.as_dataframe_with_unix_timestamps(lag_seconds=lag_in_seconds)
         resampler = DataResampler(df, self.freemocap_timestamps)
         resampler.resample()
+        self.resampled_qualisys_joint_center_data = resampler.as_dataframe
         return LagCalculatorComponent(
             joint_center_array=resampler.rotated_resampled_marker_array(joint_center_names),
             list_of_joint_center_names=joint_center_names

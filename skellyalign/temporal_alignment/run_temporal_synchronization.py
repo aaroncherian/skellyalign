@@ -19,9 +19,9 @@ def run_temporal_synchronization(recording_config: Recording):
     return TemporalSyncManager(recording_config).run()
 
 
-if __name__ == '__main__':
+if __name__ in {"__main__", "__mp_main__"}:
     from skellyalign.temporal_alignment.create_temporal_sync_config import create_temporal_sync_config
-    from skellyalign.temporal_alignment.marker_sets.full_body_joint_center_weights import joint_center_weights
+    from skellyalign.temporal_alignment.marker_sets.prosthetic_joint_center_weights import joint_center_weights
     from pathlib import Path
 
     def setup_recording_config(path: str) -> Recording:
@@ -36,11 +36,14 @@ if __name__ == '__main__':
         )
         return config
     
-    recording_folder_path= r"D:\mdn_data\sesh_2023-05-17_13_48_44_MDN_treadmill_2"
+    recording_folder_path= r"D:\2023-06-07_TF01\1.0_recordings\treadmill_calib\sesh_2023-06-07_12_06_15_TF01_flexion_neutral_trial_1"
     
     recording_config = setup_recording_config(recording_folder_path)
 
 
 
-    marker_data_synced = run_temporal_synchronization(recording_config)
+    marker_data_synced, joint_center_data_synced = run_temporal_synchronization(recording_config)
     marker_data_synced.to_csv(Path(recording_config.output_path/'component_qualisys_original'/'marker_data_synced.csv'), index=False)
+
+    joint_center_data_synced.to_csv(Path(recording_config.output_path/'component_qualisys_original'/'joint_center_data_synced.csv'), index=False)
+
