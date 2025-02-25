@@ -75,7 +75,7 @@ def run_ransac_spatial_alignment(alignment_config: SpatialAlignmentConfig):
     alignment_config : SpatialAlignmentConfig
         The configuration for the alignment process.
 
-    Returns:
+    Returns:    
     -------
     aligned_freemocap_skeleton_model : Skeleton
         The aligned FreeMoCap data in a Skeleton model
