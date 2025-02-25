@@ -21,7 +21,7 @@ def run_temporal_synchronization(recording_config: Recording):
 
 if __name__ in {"__main__", "__mp_main__"}:
     from skellyalign.temporal_alignment.create_temporal_sync_config import create_temporal_sync_config
-    from skellyalign.temporal_alignment.marker_sets.prosthetic_joint_center_weights import joint_center_weights
+    from skellyalign.temporal_alignment.marker_sets.full_body_joint_center_weights import joint_center_weights
     from pathlib import Path
 
     def setup_recording_config(path: str) -> Recording:
@@ -47,7 +47,50 @@ if __name__ in {"__main__", "__mp_main__"}:
     folder_to_save_qualisys_data = Path(recording_config.output_path/'component_qualisys_synced')
     folder_to_save_qualisys_data.mkdir(parents = True, exist_ok=True)
 
-    marker_data_synced.to_csv(folder_to_save_qualisys_data/'marker_data_synced.csv', index = False)
+    marker_data_synced.to_csv(folder_to_save_qualisys_data/'qualisys_markers_synced.csv', index = False)
 
-    joint_center_data_synced.to_csv(folder_to_save_qualisys_data/'joint_center_data_synced.csv', index=False)
+    joint_center_data_synced.to_csv(folder_to_save_qualisys_data/'qualisys_joint_centers_synced.csv', index=False)
+
+    import pandas as pd
+    import numpy as np
+    import re
+
+def convert_csv_to_npy(csv_file_path, npy_file_path):
+    """
+    Converts a CSV file containing motion capture data into an .npy file with 
+    the format [frame, marker, dimension].
+
+    Parameters:
+    csv_file_path (str): Path to the input CSV file.
+    npy_file_path (str): Path to save the output .npy file.
+
+    Returns:
+    tuple: Shape of the saved numpy array and the file path.
+    """
+    import numpy as np
+    import pandas as pd
+
+    # Load the CSV file
+    df = pd.read_csv(csv_file_path)
+
+    # Extract relevant data (excluding Time, Frame, and Unix timestamps columns)
+    marker_columns = [col for col in df.columns if col not in ["Time", "Frame", "unix_timestamps"]]
+
+    # Determine the number of frames and markers
+    num_frames = len(df)
+    num_markers = len(marker_columns) // 3  # Each marker has x, y, z coordinates
+
+    # Reshape data into [frame, marker, dimension] format
+    data_reshaped = df[marker_columns].to_numpy().reshape(num_frames, num_markers, 3)
+
+    # Save to an .npy file
+    np.save(npy_file_path, data_reshaped)
+
+    return data_reshaped.shape, npy_file_path
+
+
+
+    
+convert_csv_to_npy(csv_file_path=folder_to_save_qualisys_data/'qualisys_joint_centers_synced.csv', 
+                             npy_file_path = folder_to_save_qualisys_data/'qualisys_joint_centers_synced.npy')
 
