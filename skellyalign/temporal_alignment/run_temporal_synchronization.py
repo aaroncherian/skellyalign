@@ -36,14 +36,18 @@ if __name__ in {"__main__", "__mp_main__"}:
         )
         return config
     
-    recording_folder_path= r"D:\2023-06-07_TF01\1.0_recordings\treadmill_calib\sesh_2023-06-07_12_06_15_TF01_flexion_neutral_trial_1"
+    recording_folder_path= r"D:\2023-05-17_MDN_NIH_data\1.0_recordings\calib_3\sesh_2023-05-17_13_48_44_MDN_treadmill_2"
     
     recording_config = setup_recording_config(recording_folder_path)
 
 
 
     marker_data_synced, joint_center_data_synced = run_temporal_synchronization(recording_config)
-    marker_data_synced.to_csv(Path(recording_config.output_path/'component_qualisys_original'/'marker_data_synced.csv'), index=False)
 
-    joint_center_data_synced.to_csv(Path(recording_config.output_path/'component_qualisys_original'/'joint_center_data_synced.csv'), index=False)
+    folder_to_save_qualisys_data = Path(recording_config.output_path/'component_qualisys_synced')
+    folder_to_save_qualisys_data.mkdir(parents = True, exist_ok=True)
+
+    marker_data_synced.to_csv(folder_to_save_qualisys_data/'marker_data_synced.csv', index = False)
+
+    joint_center_data_synced.to_csv(folder_to_save_qualisys_data/'joint_center_data_synced.csv', index=False)
 
